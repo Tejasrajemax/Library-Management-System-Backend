@@ -1,0 +1,28 @@
+.\mvnw.cmd clean compile : eske use se hum maven ke configration ko open krke then delete krte
+                            hi purane files ko taki new and updated files aa ske or then compile krta hai
+
+.\mvnw.cmd spring-boot:run : used to run then spring boot to start the application
+
+@RequestBody : used to connect frontend to spring boot
+                (Take the data from the HTTP request body and convert it into a Student Java object.)
+
+Object-Relational Mapping (ORM) is a programming technique used to convert data between two incompatible systems:
+                        object-oriented programming (OOP) languages (like Java, C#, or Python) and relational databases (like MySQL, PostgreSQL, or Oracle).
+
+ORM acts as a translator. Instead of writing raw database queries inside your
+                        application code, you can interact with your database using the native objects of your programming language.
+                        
+Math.Min : Get Min Value after comparing two
+Math.Max : Get Max Value after comparing two
+plusDays : Used to Add no. the Days after the given date
+ChronoUnit.(DAYS/Month/Year etc).between : used to find the gaps between two given ( Days or Month etc )
+
+ThreadLocalRandom.current
+Locale.Root
+@Transactional annotation : used to guarantee that a group of database operation either succeed completely or fail completely as single unit of work
+
+UUID stands for Universally unique Identifier
+UUID.randomUUID() : to generate random Identifier
+toString : convert Object to String
+
+JSON is a common format for exchanging information between applications.

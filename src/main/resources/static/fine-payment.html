@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Fine Payment</title>
+
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .payment-box {
+            background: white;
+            padding: 30px;
+            width: 350px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #243b55;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 7px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 22px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="payment-box">
+
+    <h2>Library Fine Payment</h2>
+
+    <label>Enrollment Number</label>
+    <input type="number" id="enrollmentNo"
+           placeholder="Enter enrollment number">
+
+    <label>Fine Amount (₹)</label>
+    <input type="number" id="amount"
+           placeholder="Enter amount">
+
+    <button onclick="payFine()">Pay Now</button>
+
+    <p id="message"></p>
+
+</div>
+
+<script>
+    const cashfree = Cashfree({
+        mode: "sandbox"
+    });
+
+    async function payFine() {
+
+        const enrollmentNo =
+            document.getElementById("enrollmentNo").value;
+
+        const amount =
+            document.getElementById("amount").value;
+
+        const message =
+            document.getElementById("message");
+
+        if (!enrollmentNo || !amount || Number(amount) <= 0) {
+            message.innerText = "Please enter valid details.";
+            return;
+        }
+
+        try {
+
+            message.innerText = "Creating payment order...";
+
+            const response = await fetch(
+                `/payments/create/${enrollmentNo}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        amount: Number(amount)
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || data.Message ||
+                                "Unable to create payment order");
+            }
+
+            const paymentSessionId = data.paymentSessionId;
+
+            if (!paymentSessionId) {
+                throw new Error("Payment session ID not received.");
+            }
+
+            message.innerText = "Opening Cashfree checkout...";
+
+            await cashfree.checkout({
+                paymentSessionId: paymentSessionId
+            });
+
+        } catch (error) {
+
+            message.innerText = error.message;
+            console.error(error);
+
+        }
+    }
+</script>
+
+</body>
+</html>
