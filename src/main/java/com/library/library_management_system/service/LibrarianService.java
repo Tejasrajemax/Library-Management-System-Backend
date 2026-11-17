@@ -8,15 +8,18 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.library.library_management_system.model.Librarian;
 import com.library.library_management_system.repository.LibrarianRepository;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LibrarianService {
 
     private final LibrarianRepository librarianRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public LibrarianService(LibrarianRepository librarianRepository) {
+    public LibrarianService(LibrarianRepository librarianRepository, PasswordEncoder passwordEncoder) {
         this.librarianRepository = librarianRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private String generateLibrarianId(String name){
@@ -45,6 +48,10 @@ public class LibrarianService {
     public Librarian createLibrarian(Librarian librarian) {
         librarian.setId(null)    ;
         librarian.setLibrarianId(generateLibrarianId(librarian.getName()));
+// Protect the Password if anyone get DataBAse Password because it Stores BCrypt Hash in database
+        String encodedPassword = passwordEncoder.encode(librarian.getPassword());
+        librarian.setPassword(encodedPassword);
+
         return librarianRepository.save(librarian);
     }
 
@@ -66,7 +73,9 @@ public class LibrarianService {
 
         existingLibrarian.setName(updatedLibrarian.getName());
         existingLibrarian.setPhone(updatedLibrarian.getPhone());
-        existingLibrarian.setPassword(updatedLibrarian.getPassword());
+        if(updatedLibrarian.getPassword() != null && !updatedLibrarian.getPassword().isBlank()){
+            existingLibrarian.setPassword(passwordEncoder.encode(updatedLibrarian.getPassword()));
+        }
 
         return librarianRepository.save(existingLibrarian);
     }

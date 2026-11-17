@@ -88,10 +88,17 @@ public class CashfreePaymentService {
 
         // Prepare Order Request
         Map<String, Object> request = Map.of(
-                        "order_id", orderId,
-                        "order_amount", amount,
-                        "order_currency", "INR",
-                        "customer_details", customerDetails );
+            "order_id", orderId,
+            "order_amount", amount,
+            "order_currency", "INR",
+            "customer_details", customerDetails,
+            // tells Cashfree that the next value is the webpage address where the student should return after checkout.
+            "order_meta", Map.of(
+                "return_url",
+                "http://localhost:8080/payment-result.html?order_id={order_id}"
+            )
+        );
+
         
         try{
             // Send Request to CashFree
@@ -148,7 +155,7 @@ public class CashfreePaymentService {
         }
     }
 
-
+// Verify Payment
     @Transactional
     public FinePayment verifyPayment(String orderId) {
 
@@ -158,6 +165,14 @@ public class CashfreePaymentService {
 
         // 2. If already paid, do not deduct again
         if (payment.getStatus() == PaymentStatus.PAID) {
+            
+            // Generate receipt number if it is missing
+            if (payment.getReceiptNumber() == null){
+                String receiptNumber = "REC-" + payment.getPaidAt().getYear() + "-" +
+                                                String.format("%06d", payment.getId());
+                payment.setReceiptNumber(receiptNumber);
+                return finePaymentRepository.save(payment);
+            }
             return payment;
         }
 
@@ -171,6 +186,7 @@ public class CashfreePaymentService {
                 .body(Map.class);
 
         // 4. Check Cashfree order status
+        System.out.println("Cashfree Order Response: " + orderResponse);
         String orderStatus = orderResponse.get("order_status").toString();
 
         if (!"PAID".equalsIgnoreCase(orderStatus)) {
@@ -207,6 +223,7 @@ public class CashfreePaymentService {
                 break;
             }
         }
+        System.out.println("Cashfree Payment Response: " + paymentResponses);
 
         // 8. If no successful transaction exists, do not deduct fine
         if (successfulPayment == null) {
@@ -247,7 +264,13 @@ public class CashfreePaymentService {
         payment.setStatus(PaymentStatus.PAID);
         payment.setPaidAt(LocalDateTime.now());
 
+        //  Geerate a Permanent receipt number
+        if(payment.getReceiptNumber() == null){
+            String receiptNumber = "REC-" + payment.getPaidAt().getYear() + "-" +
+                                    String.format("%06d", payment.getId());
+            payment.setReceiptNumber(receiptNumber);
+        }
+
         return finePaymentRepository.save(payment);
     }
-
 }

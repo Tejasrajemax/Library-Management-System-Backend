@@ -70,11 +70,11 @@
 
     <label>Enrollment Number</label>
     <input type="number" id="enrollmentNo"
-           placeholder="Enter enrollment number">
+        placeholder="Enter enrollment number">
 
     <label>Fine Amount (₹)</label>
     <input type="number" id="amount"
-           placeholder="Enter amount">
+        placeholder="Enter amount">
 
     <button onclick="payFine()">Pay Now</button>
 
@@ -87,6 +87,7 @@
         mode: "sandbox"
     });
 
+    
     async function payFine() {
 
         const enrollmentNo =
@@ -105,6 +106,7 @@
 
         try {
 
+            // STEP 1: Create payment order
             message.innerText = "Creating payment order...";
 
             const response = await fetch(
@@ -123,21 +125,57 @@
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || data.Message ||
-                                "Unable to create payment order");
+                throw new Error(
+                    data.message || data.Message ||
+                    "Unable to create payment order"
+                );
             }
 
             const paymentSessionId = data.paymentSessionId;
+            const orderId = data.orderId;
 
-            if (!paymentSessionId) {
-                throw new Error("Payment session ID not received.");
+            if (!paymentSessionId || !orderId) {
+                throw new Error("Payment details not received.");
             }
 
+            // STEP 2: Open Cashfree checkout
             message.innerText = "Opening Cashfree checkout...";
 
             await cashfree.checkout({
                 paymentSessionId: paymentSessionId
             });
+
+            // STEP 3: Verify payment with our backend
+            message.innerText = "Checking payment status...";
+
+            const verifyResponse = await fetch(
+                `/payments/verify/${encodeURIComponent(orderId)}`,
+                {
+                    method: "POST"
+                }
+            );
+
+            const verifyData = await verifyResponse.json();
+
+            if (!verifyResponse.ok) {
+                throw new Error(
+                    verifyData.message ||
+                    "Payment verification failed."
+                );
+            }
+
+            // STEP 4: Display final payment status
+            if (verifyData.status === "PAID") {
+
+                message.innerText =
+                    "Payment successful! Your fine has been paid.";
+
+            } else {
+
+                message.innerText =
+                    "Payment is not confirmed yet. Current status: " +
+                    verifyData.status;
+            }
 
         } catch (error) {
 
@@ -146,6 +184,7 @@
 
         }
     }
+
 </script>
 
 </body>

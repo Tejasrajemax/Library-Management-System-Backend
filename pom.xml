@@ -63,8 +63,17 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
 
+<!-- Spring Security will help us:
+- Authenticate admin and librarian accounts.
+- Protect dashboard pages and backend APIs.
+- Restrict admin-only functionality.
+- Manage login sessions and permissions. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>

@@ -26,3 +26,10 @@ UUID.randomUUID() : to generate random Identifier
 toString : convert Object to String
 
 JSON is a common format for exchanging information between applications.
+
+// HttpSession is a Java interface that allows the server to remember a user across multiple requests.
+// setAttribute() stores information in the session.
+
+CSRF : (Cross-Site Request Forgery) CSRF protection makes sure that requests made using your login session are genuinely intended by you.
+Security Filter Chain: Checks authentication and permissions for incoming requests.
+

@@ -20,6 +20,8 @@ public class FinePayment {
     @Column(name = "order_id", nullable = false, unique = true)
     private String orderId;
 
+    private String receiptNumber;
+
     // Used to open Cashfree Checkout
     @Column(name = "payment_session_id", length = 500)
     private String paymentSessionId;
@@ -80,6 +82,14 @@ public class FinePayment {
 
     public void setOrderId(String orderId) {
         this.orderId = orderId;
+    }
+
+    public String getReceiptNumber() {
+        return receiptNumber;
+    }
+
+    public void setReceiptNumber(String receiptNumber) {
+        this.receiptNumber = receiptNumber;
     }
 
     public String getPaymentSessionId() {
